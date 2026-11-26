@@ -5,20 +5,31 @@ on:
     branches:
       - main
       - master
-  pull_request:
-    branches:
-      - main
-      - master
+    paths-ignore:
+      - '.github/**'
+      - '*.zip'
+  workflow_run:
+    workflows: ["Rapikan Struktur Repository"]
+    types:
+      - completed
   workflow_dispatch:
 
 jobs:
   build-apk:
     name: Compile Bloxstrap Mobile APK
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout Source Code
         uses: actions/checkout@v4
+
+      - name: Cek Kelengkapan Project Android
+        run: |
+          if [ ! -f "settings.gradle.kts" ] || [ ! -f "app/build.gradle.kts" ]; then
+            echo "Project Android belum terekstrak. Jalankan workflow Rapikan Struktur Repository dulu."
+            exit 1
+          fi
 
       - name: Setup JDK 17
         uses: actions/setup-java@v4
@@ -26,8 +37,8 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
+      - name: Pastikan Lisensi Android SDK Aktif
+        run: yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses > /dev/null 2>&1 || true
 
       - name: Setup Gradle 8.7
         uses: gradle/actions/setup-gradle@v4
