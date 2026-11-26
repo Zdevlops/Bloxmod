@@ -1,6 +1,0 @@
-<resources>
-    <style name="Theme.BloxstrapMobile" parent="android:Theme.Material.NoActionBar">
-        <item name="android:statusBarColor">#181411</item>
-        <item name="android:navigationBarColor">#181411</item>
-    </style>
-</resources>
