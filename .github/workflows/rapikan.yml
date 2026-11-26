@@ -1,0 +1,45 @@
+name: Rapikan Struktur Repository
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - master
+    paths-ignore:
+      - '.github/**'
+
+permissions:
+  contents: write
+
+jobs:
+  rapikan:
+    name: Rapikan & Bersihkan File Repo
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Bersihkan File Sampah & Rapikan Struktur Folder
+        run: |
+          find . -maxdepth 4 \( -name ".DS_Store" -o -name "Thumbs.db" -o -name "*.tmp" -o -name "*.bak" -o -name "*~" \) -delete
+          mkdir -p docs
+          if [ -f "PRD.md" ] && [ ! -f "docs/PRD.md" ]; then
+            mv "PRD.md" "docs/PRD.md"
+          fi
+          chmod +x gradlew 2>/dev/null || true
+
+      - name: Commit & Push Perubahan Rapi
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if ! git diff --staged --quiet; then
+            git commit -m "chore: rapikan struktur repository otomatis [skip ci]"
+            git push
+          else
+            echo "Struktur repository sudah rapi."
+          fi
