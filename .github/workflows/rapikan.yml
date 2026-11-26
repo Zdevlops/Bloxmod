@@ -23,11 +23,19 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Ekstrak Source ZIP & Rapikan Struktur Folder
+      - name: Ekstrak Semua File ZIP & Rapikan Struktur Folder
         run: |
-          if [ -f "Bloxstrap-Mobile-Source.zip" ]; then
-            unzip -o "Bloxstrap-Mobile-Source.zip" -x ".github/*"
-            rm -f "Bloxstrap-Mobile-Source.zip"
+          shopt -s nullglob nocaseglob
+          ZIP_FILES=(*.zip)
+          if [ ${#ZIP_FILES[@]} -eq 0 ]; then
+            echo "Tidak ada file .zip di root repository."
+            ls -la
+          else
+            for zf in "${ZIP_FILES[@]}"; do
+              echo "Mengekstrak: $zf"
+              unzip -o "$zf" -x ".github/*"
+              rm -f "$zf"
+            done
           fi
 
           rm -f "rapikan.yml"
@@ -43,5 +51,5 @@ jobs:
             git commit -m "chore: ekstrak source code & rapikan struktur repo"
             git push
           else
-            echo "Struktur repository sudah rapi."
+            echo "Tidak ada perubahan baru untuk di-commit."
           fi
