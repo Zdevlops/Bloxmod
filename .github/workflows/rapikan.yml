@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   rapikan:
-    name: Rapikan & Bersihkan File Repo
+    name: Ekstrak ZIP & Rapikan Struktur Repo
     runs-on: ubuntu-latest
 
     steps:
@@ -23,13 +23,15 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Bersihkan File Sampah & Rapikan Struktur Folder
+      - name: Ekstrak Source ZIP & Rapikan Struktur Folder
         run: |
-          find . -maxdepth 4 \( -name ".DS_Store" -o -name "Thumbs.db" -o -name "*.tmp" -o -name "*.bak" -o -name "*~" \) -delete
-          mkdir -p docs
-          if [ -f "PRD.md" ] && [ ! -f "docs/PRD.md" ]; then
-            mv "PRD.md" "docs/PRD.md"
+          if [ -f "Bloxstrap-Mobile-Source.zip" ]; then
+            unzip -o "Bloxstrap-Mobile-Source.zip" -x ".github/*"
+            rm -f "Bloxstrap-Mobile-Source.zip"
           fi
+
+          rm -f "rapikan.yml"
+          find . -maxdepth 4 \( -name ".DS_Store" -o -name "Thumbs.db" -o -name "*.tmp" -o -name "*.bak" -o -name "*~" \) -delete
           chmod +x gradlew 2>/dev/null || true
 
       - name: Commit & Push Perubahan Rapi
@@ -38,7 +40,7 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
           if ! git diff --staged --quiet; then
-            git commit -m "chore: rapikan struktur repository otomatis [skip ci]"
+            git commit -m "chore: ekstrak source code & rapikan struktur repo"
             git push
           else
             echo "Struktur repository sudah rapi."
